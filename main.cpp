@@ -9,9 +9,9 @@ typedef vector<int> longnum;
 typedef complex<double> cd;
 typedef vector<cd> vcd;
 
-fstream fin_answer("answer.txt", ios::in);
-fstream fin("in.txt", ios::in);
-fstream fout("out.txt", ios::out);
+fstream fin_answer("tests\\answer.txt", ios::in);
+fstream fin("tests\\in.txt", ios::in);
+fstream fout("tests\\out.txt", ios::out);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void print_big(longnum &a){

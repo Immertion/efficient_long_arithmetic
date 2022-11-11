@@ -4,6 +4,8 @@ using namespace std;
 
 const string zero_dpf = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 const int base = 10;
+const int execution_time = 2000;
+vector<int> wrong_test;
 const double pi = acos(-1);
 typedef vector<int> longnum;
 typedef complex<double> cd;
@@ -13,15 +15,16 @@ fstream fin_answer("tests\\answer.txt", ios::in);
 fstream fin("tests\\in.txt", ios::in);
 fstream fout("tests\\out.txt", ios::out);
 
+
+struct big_intenger{
+    string convert;
+    longnum numbers;
+    bool flag;
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void print_big(longnum &a){
-    if (a.empty()){
-        fout << "0";
-    }
-    else{
-        fout << a.back();
-    }
-    for (int i = a.size() - 2; i >= 0; i--){
+    for (int i = a.size() - 1; i >= 0; i--){
         fout <<  a[i];
     }
 }
@@ -135,6 +138,13 @@ void extend_vec(vector<int>& v, size_t len) {
     v.resize(len);
 }
 
+void finalize(vector<int>& res) {
+    for (auto i = 0; i < res.size(); ++i) {
+        res[i + 1] += res[i] / base;
+        res[i] %= base;
+    }
+}
+
 vector<int> naive_mul(const vector<int>& x, const vector<int>& y) {
     auto len = x.size();
     vector<int> res(2 * len);
@@ -144,7 +154,7 @@ vector<int> naive_mul(const vector<int>& x, const vector<int>& y) {
             res[i + j] += x[i] * y[j];
         }
     }
-
+    finalize(res);
     return res;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,14 +215,12 @@ void normalize(longnum &a){
             break;
         }
     }
-}
-
-void finalize(vector<int>& res) {
-    for (auto i = 0; i < res.size(); ++i) {
-        res[i + 1] += res[i] / base;
-        res[i] %= base;
+    if (a.empty()){
+        a.push_back(0);
     }
 }
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,80 +300,98 @@ longnum division_big(longnum &a, long long int b) {
 
 int main()
 {
-    longnum a, b, answer;
-    string str_b, str_answer, str_a;
+    struct big_intenger one;
+    struct big_intenger two;
+    struct big_intenger answer;
 
+    int start_time;
+    int end_time;
     char str_operand;
     int division_b;
     int tests = 0;
-    vector<int> wrong;
     bool flag;
-    while (tests != 13 ) {
+
+    while (tests != 5 ) {
+        start_time =  clock();
         tests += 1;
         flag = false;
-        fin >> str_a >> str_operand;
-        if (str_operand == '/') fin >> division_b;
-        else fin >> str_b;
-        str_a = zero_dpf + str_a;
-        fin_answer >> str_answer;
-        a = reading_big(str_a, a);
-        b = reading_big(str_b, b);
-        answer = reading_big(str_answer, answer);
+
+        fin >> one.convert >> str_operand;
+        fin_answer >> answer.convert;
+
+        one.convert > two.convert ? zero_dpf + one.convert : zero_dpf + two.convert;
+        str_operand == '/' ?  fin >> division_b : fin >> two.convert;
+
+        one.numbers = reading_big(one.convert, one.numbers);
+        two.numbers = reading_big(two.convert, two.numbers);
+        answer.numbers = reading_big(answer.convert, answer.numbers);
+
 
         if (str_operand == '+') {
-            a = addition_big(a, b);
+            one.numbers = addition_big(one.numbers, two.numbers);
         }
-        else if (str_operand == '-') {
 
-            a = differnt_big(a, b, flag);
+        else if (str_operand == '-') {
+            one.numbers = differnt_big(one.numbers, two.numbers, flag);
             if (flag == true) {
                 fout << '-';
             }
         }
+
         else if (str_operand == '*') {
-            auto n = max(a.size(), b.size());
-            extend_vec(a, n);
-            extend_vec(b, n);
-            if (n < 100) {
-                a = naive_mul(a, b);
-                finalize(a);
+            auto n = max(one.numbers.size(), two.numbers.size());
+            extend_vec(one.numbers, n);
+            extend_vec(two.numbers, n);
+            if (n < 10000) {
+                one.numbers = naive_mul(one.numbers, two.numbers);
+
             } else {
-                a = normalize_dpf(poly_multiply(a, b));
+                one.numbers = normalize_dpf(poly_multiply(one.numbers, two.numbers));
             }
         }
+
         else if (str_operand == '/'){
-            division_big(a, division_b);
+            division_big(one.numbers, division_b);
         }
 
-        normalize(a);
-        if (a.empty()){
-            a.push_back(0);
-        }
-        if (a == answer) {
+        normalize(one.numbers);
+
+        end_time = clock();
+
+        if (one.numbers != answer.numbers || end_time - start_time >= execution_time) {
+            wrong_test.push_back(tests);
+            fout << tests  << ") wrong_test ";
+            if (one.numbers != answer.numbers){
+                print_big(one.numbers);
+                fout << ": Answer - ";
+                print_big(answer.numbers);
+                fout << endl;
+            }
+            if (end_time - start_time >= execution_time) {
+                fout << end_time - start_time << "ms";
+                fout << ": Time Limit" << endl;
+            }
 
         }
-        else {
-            wrong.push_back(tests);
-            fout << "wrong ";
-            print_big(a);
-            fout << ": Answer - ";
-            print_big(answer);
-            fout << endl;
-        }
-        a.clear();
-        b.clear();
-        answer.clear();
+
+
+        one.numbers.clear();
+        two.numbers.clear();
+        answer.numbers.clear();
     }
-    if (wrong.empty()){
+
+
+
+    if (wrong_test.empty()){
         fout << "OK";
     }
     else {
         fout << "wrong test: ";
-        for (int i = 0; i < wrong.size(); i++) {
+        for (int i = 0; i < wrong_test.size(); i++) {
             if (i >= 1){
                 fout << ", ";
             }
-            fout << wrong[i];
+            fout << wrong_test[i];
         }
     }
 

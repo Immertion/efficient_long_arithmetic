@@ -19,7 +19,7 @@ fstream fout("tests\\out.txt", ios::out);
 struct big_intenger{
     string convert;
     longnum numbers;
-    bool flag;
+    bool flag = false;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,11 +29,14 @@ void print_big(longnum &a){
     }
 }
 
-longnum reading_big(string &str, longnum &a){
+void reading_big(string &str, longnum &a, bool &flag){
+    if (str[0] == '-'){
+        flag = true;
+        str.erase(0,1);
+    }
     for (int i = str.length() - 1; i >= 0; i -= 1){
         a.push_back(static_cast<int>(str[i]) - 48);
     }
-    return a;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 longnum addition_big(longnum &a, longnum &b){
@@ -119,6 +122,7 @@ longnum differnt_big(longnum &a, longnum &b, bool &flag){
 
     longnum c(length);
     if (k == 1) {
+        flag = false;
         return difference(a, b, c, length);
     }
     if (k == 2){
@@ -126,6 +130,7 @@ longnum differnt_big(longnum &a, longnum &b, bool &flag){
         return difference(b, a, c, length);
     }
     if (k == 3){
+        flag = false;
         return difference(a, b, c, length);
     }
 }
@@ -309,12 +314,12 @@ int main()
     char str_operand;
     int division_b;
     int tests = 0;
-    bool flag;
 
-    while (tests != 5 ) {
+
+    while (tests != 19 ) {
         start_time =  clock();
         tests += 1;
-        flag = false;
+
 
         fin >> one.convert >> str_operand;
         fin_answer >> answer.convert;
@@ -322,19 +327,39 @@ int main()
         one.convert > two.convert ? zero_dpf + one.convert : zero_dpf + two.convert;
         str_operand == '/' ?  fin >> division_b : fin >> two.convert;
 
-        one.numbers = reading_big(one.convert, one.numbers);
-        two.numbers = reading_big(two.convert, two.numbers);
-        answer.numbers = reading_big(answer.convert, answer.numbers);
+        reading_big(one.convert, one.numbers, one.flag);
+        reading_big(two.convert, two.numbers, two.flag);
+        reading_big(answer.convert, answer.numbers, answer.flag);
+
 
 
         if (str_operand == '+') {
-            one.numbers = addition_big(one.numbers, two.numbers);
+            if (one.flag && !two.flag || !one.flag && two.flag){
+                one.numbers = differnt_big(one.numbers, two.numbers, one.flag);
+            }
+            else {
+                if (one.flag && two.flag) {
+                    one.flag = true;
+                }
+                else{
+                    one.flag = false;
+                }
+                one.numbers = addition_big(one.numbers, two.numbers);
+            }
         }
 
         else if (str_operand == '-') {
-            one.numbers = differnt_big(one.numbers, two.numbers, flag);
-            if (flag == true) {
-                fout << '-';
+            if (one.flag && !two.flag || !one.flag && two.flag){
+                if (one.flag && !two.flag) {
+                    one.flag = true;
+                }
+                else{
+                    one.flag = false;
+                }
+                one.numbers = addition_big(one.numbers, two.numbers);
+            }
+            else {
+                one.numbers = differnt_big(one.numbers, two.numbers, one.flag);
             }
         }
 
@@ -348,6 +373,9 @@ int main()
             } else {
                 one.numbers = normalize_dpf(poly_multiply(one.numbers, two.numbers));
             }
+            if (one.flag && !two.flag || !one.flag && two.flag){
+                one.flag = true;
+            }
         }
 
         else if (str_operand == '/'){
@@ -358,26 +386,33 @@ int main()
 
         end_time = clock();
 
-        if (one.numbers != answer.numbers || end_time - start_time >= execution_time) {
+        if (one.numbers != answer.numbers || answer.flag != one.flag || end_time - start_time >= execution_time) {
             wrong_test.push_back(tests);
-            fout << tests  << ") wrong_test ";
-            if (one.numbers != answer.numbers){
+            fout << tests  << ") wrong answer ";
+            if (one.numbers != answer.numbers || answer.flag != one.flag){
+                if (one.flag){
+                    fout << '-';
+                }
                 print_big(one.numbers);
-                fout << ": Answer - ";
+                fout << ": correct answer ";
+                if (answer.flag){
+                    fout << '-';
+                }
                 print_big(answer.numbers);
                 fout << endl;
             }
-            if (end_time - start_time >= execution_time) {
-                fout << end_time - start_time << "ms";
+            else if (end_time - start_time >= execution_time) {
+                fout << end_time - start_time << "(ms)";
                 fout << ": Time Limit" << endl;
             }
-
+        }
+        else{
+            fout << tests << ") OK" << endl;
         }
 
-
-        one.numbers.clear();
-        two.numbers.clear();
-        answer.numbers.clear();
+        one = {};
+        two = {};
+        answer = {};
     }
 
 
@@ -394,6 +429,8 @@ int main()
             fout << wrong_test[i];
         }
     }
+
+
 
     fin.close();
     fout.close();

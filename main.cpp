@@ -1,3 +1,5 @@
+
+
 #include "iostream"
 #include "math.h"
 #include "vector"
@@ -45,6 +47,46 @@ void reading_big(big_integer &number){
     for (int i = number.convert.size() - 1; i >= 0; i--){
         number.numbers.push_back(static_cast<int>(number.convert[i]) - 48);
     }
+}
+bool operator ==(big_integer &number_first, big_integer &number_second) {
+    if (number_first.numbers.size() != number_second.numbers.size()){
+        return false;
+    }
+    for (int i = number_first.numbers.size(); i > 0; i--){
+        if (number_first.numbers[i] != number_second.numbers[0]){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool operator <(big_integer &number_first, big_integer &number_second) {
+    if (number_first == number_second) return false;
+
+    else {
+        if (number_first.numbers.size() != number_second.numbers.size()) {
+            return number_first.numbers.size() < number_second.numbers.size();
+        }
+        else {
+            for (long long i = number_first.numbers.size() - 1; i >= 0; --i) {
+                if (number_first.numbers[i] != number_second.numbers[i]) return number_first.numbers[i] < number_second.numbers[i];
+            }
+
+            return false;
+        }
+    }
+}
+
+bool operator <=(big_integer& number_first, big_integer& number_second) {
+    return (number_first < number_second || number_first == number_second);
+}
+
+bool operator >(big_integer& number_first, big_integer& number_second) {
+    return !(number_first <= number_second);
+}
+
+bool operator >=(big_integer& number_first, big_integer& number_second) {
+    return !(number_first < number_second);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 big_integer addition_big(big_integer &number_first, big_integer &number_second){
@@ -232,9 +274,6 @@ void remove_leading_zeros(longnum &number){
     }
 }
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ДПФ
 template<typename T>
@@ -296,6 +335,11 @@ longnum normalize_dpf(longnum a) {
     }
     return a;
 }
+
+big_integer fft_multiply(big_integer &number_first, big_integer &number_second){
+    number_first.numbers = normalize_dpf(poly_multiply(number_first.numbers, number_second.numbers));
+    return number_first;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 longnum division_big(longnum &a, long long int b) {
     int carry = 0;
@@ -337,43 +381,24 @@ longnum waste_multiply(longnum &a, int b) {
     return a;
 }
 
-bool need_bool(longnum &number_first, longnum &number_second) {
-    if (number_first.size() > number_second.size()){
-        return true;
-    }
-    else if (number_second.size() > number_first.size()){
-        return false;
-    }
-    else
-        for (int i = number_first.size() - 1; i > 0; i--)
-        {
-            if (number_first[i] > number_second[i]){
-                return true;
-            }
-            if (number_second[i] > number_first[i]){
-                return false;
-            }
-        }
-        return true;
-}
 
 
-big_integer big_division(big_integer first_number, big_integer second_number){
-    big_integer tmp;
-    tmp.numbers.resize(first_number.numbers.size() - second_number.numbers.size() + 1);
-    for (int i = tmp.numbers.size() - 1;  i >= 0; i--){
-        longnum res = naive_mul(tmp.numbers,second_number.numbers);
-        while (need_bool(res, first_number.numbers)){
-            tmp.numbers[i]++;
-            res = naive_mul(tmp.numbers,second_number.numbers);
-        }
-        tmp.numbers[i]--;
-    }
-    while (tmp.numbers.size() > 1 && !tmp.numbers.back()){
-        tmp.numbers.pop_back();
-    }
-    return tmp;
-}
+//big_integer big_division(big_integer first_number, big_integer second_number){
+//    big_integer tmp;
+//    tmp.numbers.resize(first_number.numbers.size() - second_number.numbers.size() + 1);
+//    for (int i = tmp.numbers.size() - 1;  i >= 0; i--){
+//        longnum res = naive_mul(tmp.numbers,second_number.numbers);
+//        while (need_bool(res, first_number.numbers)){
+//            tmp.numbers[i]++;
+//            res = naive_mul(tmp.numbers,second_number.numbers);
+//        }
+//        tmp.numbers[i]--;
+//    }
+//    while (tmp.numbers.size() > 1 && !tmp.numbers.back()){
+//        tmp.numbers.pop_back();
+//    }
+//    return tmp;
+//}
 
 
 
@@ -392,7 +417,7 @@ int main()
     int tests = 0;
 
 
-    while (tests != 1 ) {
+    while (tests != 19 ) {
         start_time =  clock();
         tests += 1;
 
@@ -400,7 +425,7 @@ int main()
         fin >> first.convert >> str_operand >> second.convert;
         fin_answer >> answer.convert;
 
-//        first.convert > second.convert || str_operand == '*' ? zero_dpf + first.convert : zero_dpf + second.convert;
+        first.convert > second.convert || str_operand == '*' ? zero_dpf + first.convert : zero_dpf + second.convert;
 //        str_operand == '/' ?  fin >> division_b : fin >> second.convert;
 
         reading_big(first);
@@ -423,6 +448,9 @@ int main()
                 }
                 first = addition_big(first, second);
             }
+            if (first.numbers.size() == 1 && first.numbers[0] == 0){
+                first.sign = 0;
+            }
         }
 
         else if (str_operand == '-') {
@@ -436,10 +464,10 @@ int main()
                 first = addition_big(first, second);
             }
             else {
-                if (need_bool(first.numbers, second.numbers)){
-                }
                 first = differnt_big(first, second);
-
+            }
+            if (first.numbers.size() == 1 && first.numbers[0] == 0){
+                first.sign = 0;
             }
         }
 
@@ -447,11 +475,11 @@ int main()
             auto n = max(first.numbers.size(), second.numbers.size());
             extend_vec(first.numbers, n);
             extend_vec(second.numbers, n);
-            if (n < 100000) {
+            if (n < 100) {
                 first.numbers = naive_mul(first.numbers, second.numbers);
 
             } else {
-                first.numbers = normalize_dpf(poly_multiply(first.numbers, second.numbers));
+                first = fft_multiply(first, second);
             }
             if (first.sign && !second.sign || !first.sign && second.sign){
                 first.sign = true;

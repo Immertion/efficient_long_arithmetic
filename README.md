@@ -298,7 +298,7 @@ $$
 
 Этот многочлен называется интерполяционным многочленом Лагранжа, а сама задача проведения многочлена через точки — интерполяцией.
 
-![](http://mathworld.wolfram.com/images/eps-gif/LagrangeInterpolatingPoly_900.gif)
+<p align="center"><img src="Images\LagrangeInterpolatingPoly.gif"></p>
 
 **Примечание.** На практике интерполяцию решают методом Гаусса: её можно свести к решению линейного уравнения $aX = y$, где $X$ это матрица следующего вида:
 
@@ -348,7 +348,7 @@ vector<int> poly_multiply(vector<int> a, vector<int> b) {
 
 Комплексные числа удобно изображать на плоскости в виде вектора $(a, b)$ и считать через них всякую геометрию.
 
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Complex_vector.svg/1920px-Complex_vector.svg.png)
+<p align="center"><img src="Images\Complex_vector.png"></p>
 
 **Модулем** комплексного числа называется действительное число $r = \sqrt{a^2 + b^2}$ . Геометрически, это длина вектора $(a, b)$.
 
@@ -376,7 +376,7 @@ $$
 
 Геометрически, все такие точки живут на единичном круге:
 
-![](img/complex-circle.png)
+<p align="center"><img src="Images\roots_unity.png"></p>
 
 Такая нотация удобна, потому что можно обращаться с $e^{i\phi}$ как с обычной экспонентой. Пусть мы, например, хотим перемножить два числа на единичном круге с аргументами $a$ и $b$. Тогда это можно записать так:
 

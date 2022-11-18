@@ -1,5 +1,3 @@
-
-
 #include "iostream"
 #include "math.h"
 #include "vector"
@@ -11,10 +9,11 @@ using namespace std;
 
 
 const string zero_dpf = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-const int base = 10;
-const int execution_time = 2000;
+const int BASE = 10;
+const int EXECUTION_TIME = 2000;
 vector<int> wrong_test;
-const double pi = acos(-1);
+const int MAX_USE_NAIVE_MUL = 1000;
+const double PI = acos(-1);
 typedef vector<int> longnum;
 typedef complex<double> cd;
 typedef vector<cd> vcd;
@@ -30,46 +29,46 @@ struct big_integer{
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-void print_big(big_integer &number){
-    if (number.sign){
+void print_big(big_integer &operand){
+    if (operand.sign){
         fout << '-';
     }
-    for (int i = number.numbers.size() - 1; i >= 0; i--){
-        fout <<  number.numbers[i];
+    for (int i = operand.numbers.size() - 1; i >= 0; i--){
+        fout <<  operand.numbers[i];
     }
 }
 
-void reading_big(big_integer &number){
-    if (number.convert[0] == '-'){
-        number.sign = true;
-        number.convert.erase(0,1);
+void reading_big(big_integer &operand){
+    if (operand.convert[0] == '-'){
+        operand.sign = true;
+        operand.convert.erase(0,1);
     }
-    for (int i = number.convert.size() - 1; i >= 0; i--){
-        number.numbers.push_back(static_cast<int>(number.convert[i]) - 48);
+    for (int i = operand.convert.size() - 1; i >= 0; i--){
+        operand.numbers.push_back(static_cast<int>(operand.convert[i]) - 48);
     }
 }
-bool operator ==(big_integer &number_first, big_integer &number_second) {
-    if (number_first.numbers.size() != number_second.numbers.size()){
+bool operator ==(big_integer &operand_first, big_integer &operand_second) {
+    if (operand_first.numbers.size() != operand_second.numbers.size()){
         return false;
     }
-    for (int i = number_first.numbers.size(); i > 0; i--){
-        if (number_first.numbers[i] != number_second.numbers[0]){
+    for (int i = operand_first.numbers.size(); i > 0; i--){
+        if (operand_first.numbers[i] != operand_second.numbers[0]){
             return false;
         }
     }
     return true;
 }
 
-bool operator <(big_integer &number_first, big_integer &number_second) {
-    if (number_first == number_second) return false;
+bool operator <(big_integer &operand_first, big_integer &operand_second) {
+    if (operand_first == operand_second) return false;
 
     else {
-        if (number_first.numbers.size() != number_second.numbers.size()) {
-            return number_first.numbers.size() < number_second.numbers.size();
+        if (operand_first.numbers.size() != operand_second.numbers.size()) {
+            return operand_first.numbers.size() < operand_second.numbers.size();
         }
         else {
-            for (long long i = number_first.numbers.size() - 1; i >= 0; --i) {
-                if (number_first.numbers[i] != number_second.numbers[i]) return number_first.numbers[i] < number_second.numbers[i];
+            for (long long i = operand_first.numbers.size() - 1; i >= 0; --i) {
+                if (operand_first.numbers[i] != operand_second.numbers[i]) return operand_first.numbers[i] < operand_second.numbers[i];
             }
 
             return false;
@@ -77,112 +76,81 @@ bool operator <(big_integer &number_first, big_integer &number_second) {
     }
 }
 
-bool operator <=(big_integer& number_first, big_integer& number_second) {
-    return (number_first < number_second || number_first == number_second);
+bool operator <=(big_integer& operand_first, big_integer& operand_second) {
+    return (operand_first < operand_second || operand_first == operand_second);
 }
 
-bool operator >(big_integer& number_first, big_integer& number_second) {
-    return !(number_first <= number_second);
+bool operator >(big_integer& operand_first, big_integer& operand_second) {
+    return !(operand_first <= operand_second);
 }
 
-bool operator >=(big_integer& number_first, big_integer& number_second) {
-    return !(number_first < number_second);
+bool operator >=(big_integer& operand_first, big_integer& operand_second) {
+    return !(operand_first < operand_second);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-big_integer addition_big(big_integer &number_first, big_integer &number_second){
+big_integer addition_big(big_integer &operand_first, big_integer &operand_second){
     int length;
-    if (number_first.numbers.size() > number_second.numbers.size()) {
-        length = number_first.numbers.size() + 1;
-        while (number_first.numbers.size() != number_second.numbers.size()){
-            number_second.numbers.push_back(0);
+    if (operand_first.numbers.size() > operand_second.numbers.size()) {
+        length = operand_first.numbers.size() + 1;
+        while (operand_first.numbers.size() != operand_second.numbers.size()){
+            operand_second.numbers.push_back(0);
         }
     }
     else {
-        length = number_second.numbers.size() + 1;
-        while (number_first.numbers.size() != number_second.numbers.size()){
-            number_first.numbers.push_back(0);
+        length = operand_second.numbers.size() + 1;
+        while (operand_first.numbers.size() != operand_second.numbers.size()){
+            operand_first.numbers.push_back(0);
         }
     }
-    number_second.numbers.push_back(0);
-    number_first.numbers.push_back(0);
+    operand_second.numbers.push_back(0);
+    operand_first.numbers.push_back(0);
     for (int i = 0; i < length; i++)
     {
-        number_second.numbers[i] += number_first.numbers[i];
-        number_second.numbers[i + 1] += (number_second.numbers[i] / base);
-        number_second.numbers[i] %= base;
+        operand_second.numbers[i] += operand_first.numbers[i];
+        operand_second.numbers[i + 1] += (operand_second.numbers[i] / BASE);
+        operand_second.numbers[i] %= BASE;
     }
-    if (number_second.numbers[length - 1] == 0)
+    if (operand_second.numbers[length - 1] == 0)
         length--;
 
-    number_second.sign = number_first.sign;
-    return number_second;
+    operand_second.sign = operand_first.sign;
+    return operand_second;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-big_integer difference (big_integer &number_first, big_integer &number_second){
+big_integer difference (big_integer &operand_first, big_integer &operand_second){
     big_integer result;
-    result.numbers.resize(number_first.numbers.size());
-    while (number_first.numbers.size() != number_second.numbers.size()){
-        number_second.numbers.push_back(0);
+    result.numbers.resize(operand_first.numbers.size());
+    while (operand_first.numbers.size() != operand_second.numbers.size()){
+        operand_second.numbers.push_back(0);
     }
 
 
-    for (int i = 0; i < number_first.numbers.size(); i++)
+    for (int i = 0; i < operand_first.numbers.size(); i++)
     {
-        if (number_first.numbers[i] >= number_second.numbers[i]){
-            result.numbers[i] = number_first.numbers[i] - number_second.numbers[i];
+        if (operand_first.numbers[i] >= operand_second.numbers[i]){
+            result.numbers[i] = operand_first.numbers[i] - operand_second.numbers[i];
         }
         else{
-            number_first.numbers[i + 1] -= 1;
-            result.numbers[i] = number_first.numbers[i] + 10 - number_second.numbers[i];
+            operand_first.numbers[i + 1] -= 1;
+            result.numbers[i] = operand_first.numbers[i] + 10 - operand_second.numbers[i];
         }
     }
-    result.sign = number_first.sign;
+    result.sign = operand_first.sign;
     return result;
 
 }
 
-big_integer differnt_big(big_integer &number_first, big_integer &number_second){
-    int k = 3;
-    int length;
-    if (number_first.numbers.size() > number_second.numbers.size())
-    {
-        length = number_first.numbers.size();
-        k = 1;
-    }
-    else
-    if (number_second.numbers.size() > number_first.numbers.size())
-    {
-        length = number_second.numbers.size();
-        k = 2;
-    }
-    else
-        for (int ix = length - 1; ix > 0; ix++)
-        {
-            if (number_first.numbers[ix] > number_second.numbers[ix]){
-                k = 1;
-                break;
-            }
+big_integer differnt_big(big_integer &operand_first, big_integer &operand_second){
 
-            if(number_second.numbers[ix] > number_first.numbers[ix])
-            {
-                k = 2;
-                break;
-            }
-        }
+    if (operand_first > operand_second) {
+        operand_first.sign = false;
+        return difference(operand_first, operand_second);
+    }
+    else{
+        operand_second.sign = true;
+        return difference(operand_second, operand_first);
+    }
 
-
-    if (k == 1) {
-        number_first.sign = false;
-        return difference(number_first, number_second);
-    }
-    if (k == 2){
-        number_second.sign = true;
-        return difference(number_second, number_first);
-    }
-    if (k == 3){
-        number_first.sign = false;
-        return difference(number_first, number_second);
-    }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void extend_vec(longnum& v, size_t len) {
@@ -194,8 +162,8 @@ void extend_vec(longnum& v, size_t len) {
 
 void finalize(longnum& res) {
     for (auto i = 0; i < res.size(); ++i) {
-        res[i + 1] += res[i] / base;
-        res[i] %= base;
+        res[i + 1] += res[i] / BASE;
+        res[i] %= BASE;
     }
 }
 
@@ -260,17 +228,17 @@ longnum karatsuba(longnum &number_first, longnum &number_second){
 
 }
 
-void remove_leading_zeros(longnum &number){
-    for (int i = number.size() - 1; i >= 0; i--){
-        if (number[i] == 0){
-            number.pop_back();
+void remove_leading_zeros(longnum &operand){
+    for (int i = operand.size() - 1; i >= 0; i--){
+        if (operand[i] == 0){
+            operand.pop_back();
         }
         else{
             break;
         }
     }
-    if (number.empty()){
-        number.push_back(0);
+    if (operand.empty()){
+        operand.push_back(0);
     }
 }
 
@@ -303,21 +271,23 @@ vector<cd> fft(vector<T> p, cd w) {
 vector<cd> evaluate(longnum &p) {
     while (__builtin_popcount(p.size()) != 1)
         p.push_back(0);
-    return fft(p, polar(1., 2 * pi / p.size()));
+    return fft(p, polar(1., 2 * PI / p.size()));
 }
 
-longnum interpolate(vector<cd> p) {
+big_integer interpolate(vector<cd> p) {
     int n = p.size();
-    auto inv = fft(p, polar(1., -2 * pi / n));
+    auto inv = fft(p, polar(1., -2 * PI / n));
     vector<int> res(n);
+    big_integer result;
     for(int i = 0; i < n; i++)
         res[i] = round(real(inv[i]) / n);
-    return res;
+    result.numbers = res;
+    return result;
 }
 
-longnum poly_multiply(longnum &a, longnum &b) {
-    vcd A = evaluate(a);
-    vcd B = evaluate(b);
+big_integer poly_multiply(big_integer &operand_first, big_integer &operand_second) {
+    vcd A = evaluate(operand_first.numbers);
+    vcd B = evaluate(operand_second.numbers);
     for (int i = 0; i < A.size(); i++)
         A[i] *= B[i];
     return interpolate(A);
@@ -326,25 +296,26 @@ longnum normalize_dpf(longnum a) {
     int carry = 0;
     for (int &x : a) {
         x += carry;
-        carry = x / base;
-        x %= base;
+        carry = x / BASE;
+        x %= BASE;
     }
     while (carry > 0) {
-        a.push_back(carry % base);
-        carry /= base;
+        a.push_back(carry % BASE);
+        carry /= BASE;
     }
     return a;
 }
 
-big_integer fft_multiply(big_integer &number_first, big_integer &number_second){
-    number_first.numbers = normalize_dpf(poly_multiply(number_first.numbers, number_second.numbers));
-    return number_first;
+big_integer fft_multiply(big_integer &operand_first, big_integer &operand_second){
+    operand_first = poly_multiply(operand_first, operand_second);
+    operand_first.numbers = normalize_dpf(operand_first.numbers);
+    return operand_first;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 longnum division_big(longnum &a, long long int b) {
     int carry = 0;
     for (int i = (int) a.size() - 1; i >= 0; --i) {
-        long long cur = a[i] + carry * 1ll * base;
+        long long cur = a[i] + carry * 1ll * BASE;
         a[i] =  int(cur / b);
         carry = int(cur % b);
     }
@@ -373,8 +344,8 @@ longnum waste_multiply(longnum &a, int b) {
         if (i == a.size())
             a.push_back(0);
         long long cur = carry + a[i] * 1ll * b;
-        a[i] = int(cur % base);
-        carry = int(cur / base);
+        a[i] = int(cur % BASE);
+        carry = int(cur / BASE);
     }
     while (a.size() > 1 && a.back() == 0)
         a.pop_back();
@@ -417,23 +388,27 @@ int main()
     int tests = 0;
 
 
-    while (tests != 19 ) {
-        start_time =  clock();
+
+    while (tests != 1 ) {
         tests += 1;
 
 
         fin >> first.convert >> str_operand >> second.convert;
         fin_answer >> answer.convert;
 
-        first.convert > second.convert || str_operand == '*' ? zero_dpf + first.convert : zero_dpf + second.convert;
+
+        if (str_operand == '*' && max(first.convert.size(), second.convert.size()) > MAX_USE_NAIVE_MUL){
+            if (first.convert.size() >= second.convert.size()) first.convert = zero_dpf + first.convert;
+            else second.convert = zero_dpf + second.convert;
+        }
 //        str_operand == '/' ?  fin >> division_b : fin >> second.convert;
 
         reading_big(first);
         reading_big(second);
         reading_big(answer);
 
+        start_time =  clock();
 
-//        cout << need_bool(first.numbers, second.numbers) << " " << tests << endl;
 
         if (str_operand == '+') {
             if (first.sign && !second.sign || !first.sign && second.sign){
@@ -475,7 +450,7 @@ int main()
             auto n = max(first.numbers.size(), second.numbers.size());
             extend_vec(first.numbers, n);
             extend_vec(second.numbers, n);
-            if (n < 100) {
+            if (n < MAX_USE_NAIVE_MUL) {
                 first.numbers = naive_mul(first.numbers, second.numbers);
 
             } else {
@@ -494,8 +469,8 @@ int main()
         remove_leading_zeros(first.numbers);
 
         end_time = clock();
-        cout << end_time - start_time;
-        if (first.numbers != answer.numbers || answer.sign != first.sign || end_time - start_time >= execution_time) {
+//        cout << end_time - start_time << " " << tests << endl;
+        if (first.numbers != answer.numbers || answer.sign != first.sign || end_time - start_time >= EXECUTION_TIME) {
             wrong_test.push_back(tests);
             fout << tests  << ") wrong answer ";
             if (first.numbers != answer.numbers || answer.sign != first.sign){
@@ -504,7 +479,7 @@ int main()
                 print_big(answer);
                 fout << endl;
             }
-            else if (end_time - start_time >= execution_time) {
+            else if (end_time - start_time >= EXECUTION_TIME) {
                 fout << end_time - start_time << "(ms)";
                 fout << ": Time Limit" << endl;
             }
@@ -518,7 +493,7 @@ int main()
         answer = {};
     }
 
-
+    cout << 1ll;
 
     if (wrong_test.empty()){
         fout << "OK";
@@ -532,10 +507,6 @@ int main()
             fout << wrong_test[i];
         }
     }
-
-
-
-
 
 
     fin.close();

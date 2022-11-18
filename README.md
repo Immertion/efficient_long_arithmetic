@@ -320,9 +320,9 @@ $$
 **Основная идея алгоритма:** если мы знаем значения в каких-то различных $n + m$ точках для обоих многочленов $A$ и $B$, то, попарно перемножив их, мы за $O(n + m)$ операций можем получить значения в тех же точках для многочлена $A(x) B(x)$ — а с их помощью можно интерполяцией получить исходный многочлен и решить задачу.
 
 ``` c++
-vector<int> poly_multiply(vector<int> a, vector<int> b) {
-    vector<int> A = evaluate(a);
-    vector<int> B = evaluate(b);
+big_integer poly_multiply(big_integer &operand_first, big_integer &operand_second) {
+    vcd A = evaluate(operand_first.numbers);
+    vcd B = evaluate(operand_second.numbers);
     for (int i = 0; i < A.size(); i++)
         A[i] *= B[i];
     return interpolate(A);
@@ -559,22 +559,24 @@ vector<ftype> evaluate(vector<int> p) {
 Как обсуждалось выше, обратное преобразование Фурье удобно выразить через прямое:
 
 ``` c++
-vector<int> interpolate(vector<ftype> p) {
+big_integer interpolate(vector<cd> p) {
     int n = p.size();
-    auto inv = fft(p, polar(1., -2 * pi / n));
+    auto inv = fft(p, polar(1., -2 * PI / n));
     vector<int> res(n);
+    big_integer result;
     for(int i = 0; i < n; i++)
         res[i] = round(real(inv[i]) / n);
-    return res;
+    result.numbers = res;
+    return result;
 }
 ```
 
 Теперь мы умеем перемножать два многочлена за $O(n \log n)$:
 
 ```c++
-vector<int> poly_multiply(vector<int> a, vector<int> b) {
-    vector<int> A = fft(a);
-    vector<int> B = fft(b);
+big_integer poly_multiply(big_integer &operand_first, big_integer &operand_second) {
+    vcd A = evaluate(operand_first.numbers);
+    vcd B = evaluate(operand_second.numbers);
     for (int i = 0; i < A.size(); i++)
         A[i] *= B[i];
     return interpolate(A);
@@ -585,14 +587,15 @@ vector<int> poly_multiply(vector<int> a, vector<int> b) {
 
 ### Тестирование эффективности
 
+| N | Базовый алгоритм (ms) | Алгоритм Карацубы (ms) | Алгоритм Кули-Тьюки (ms) |
+|--------|-----------------------|------------------------|--------------------------|
+| 1000   | 17                    | 13                     | 11                       |
+| 10000  | 1154                  | 392                    | 102                      |
+| 100000 | 66329                 | 8430                   | 774                      |
 
-| N      | Базовый алгорити | Алгоритм Карацубы | Алгоритм  | Все доступы | Удаление  | Сумма  |
-|--------|--------------|---------|--------|-------------|-----------|--------|
-| 10     | 7           | 8       | 6      | 6           | 1         | 28     |
-| 100    | 14          | 9       | 3      | 51          | 2         | 79     |
-| 1000   | 20          | 26      | 5      | 934         | 5         | 990    |
-| 10000  | 27          | 29      | 21     | 15980       | 6         | 16063  |
-| 100000 | 34          | 32      | 9      | 229088      | 2         | 229165 |
+
+<p align="center"><img src="Images\grafic_effectiv.png"></p>
+
 
 
 # Список литературы

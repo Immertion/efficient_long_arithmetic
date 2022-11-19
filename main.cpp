@@ -18,8 +18,10 @@ typedef vector<int> longnum;
 typedef complex<double> cd;
 typedef vector<cd> vcd;
 
-fstream fin_answer("tests\\answer.txt", ios::in);
-fstream fin("tests\\in.txt", ios::in);
+fstream fin_eff_answer("tests\\answer2.txt", ios::in);
+fstream fin_eff("tests\\in2.txt", ios::in);
+fstream fin_logic_answer("tests\\answer.txt", ios::in);
+fstream fin_logic("tests\\in.txt", ios::in);
 fstream fout("tests\\out.txt", ios::out);
 
 struct big_integer{
@@ -37,8 +39,22 @@ void print_big(big_integer &operand){
         fout <<  operand.numbers[i];
     }
 }
+void remove_leading_zeros(longnum &operand){
+    for (int i = operand.size() - 1; i >= 0; i--){
+        if (operand[i] == 0){
+            operand.pop_back();
+        }
+        else{
+            break;
+        }
+    }
+    if (operand.empty()){
+        operand.push_back(0);
+    }
+}
 
 void reading_big(big_integer &operand){
+
     if (operand.convert[0] == '-'){
         operand.sign = true;
         operand.convert.erase(0,1);
@@ -46,6 +62,7 @@ void reading_big(big_integer &operand){
     for (int i = operand.convert.size() - 1; i >= 0; i--){
         operand.numbers.push_back(static_cast<int>(operand.convert[i]) - 48);
     }
+
 }
 bool operator ==(big_integer &operand_first, big_integer &operand_second) {
     if (operand_first.numbers.size() != operand_second.numbers.size()){
@@ -141,6 +158,8 @@ big_integer difference (big_integer &operand_first, big_integer &operand_second)
 }
 
 big_integer differnt_big(big_integer &operand_first, big_integer &operand_second){
+    remove_leading_zeros(operand_first.numbers);
+    remove_leading_zeros(operand_second.numbers);
 
     if (operand_first > operand_second) {
         operand_first.sign = false;
@@ -228,19 +247,7 @@ longnum karatsuba(longnum &number_first, longnum &number_second){
 
 }
 
-void remove_leading_zeros(longnum &operand){
-    for (int i = operand.size() - 1; i >= 0; i--){
-        if (operand[i] == 0){
-            operand.pop_back();
-        }
-        else{
-            break;
-        }
-    }
-    if (operand.empty()){
-        operand.push_back(0);
-    }
-}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ДПФ
@@ -371,132 +378,107 @@ longnum waste_multiply(longnum &a, int b) {
 //    return tmp;
 //}
 
+void test_logic(int tests, big_integer &first_operand, big_integer &second_operand, big_integer &answer,char Operator){
+    fout << "The logic test has begun" << endl;
+    for (int i = 1; i <= tests; i++){
+
+        fin_logic >> first_operand.convert >> Operator >> second_operand.convert;
+        fin_logic_answer >> answer.convert;
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int main()
-{
-    struct big_integer first;
-    struct big_integer second;
-    struct big_integer answer;
-
-    int start_time;
-    int end_time;
-    char str_operand;
-    int division_b;
-    int tests = 0;
-
-
-
-    while (tests != 1 ) {
-        tests += 1;
-
-
-        fin >> first.convert >> str_operand >> second.convert;
-        fin_answer >> answer.convert;
-
-
-        if (str_operand == '*' && max(first.convert.size(), second.convert.size()) > MAX_USE_NAIVE_MUL){
-            if (first.convert.size() >= second.convert.size()) first.convert = zero_dpf + first.convert;
-            else second.convert = zero_dpf + second.convert;
+        if (Operator == '*' && max(first_operand.convert.size(), second_operand.convert.size()) > MAX_USE_NAIVE_MUL){
+            if (first_operand.convert.size() >= second_operand.convert.size()) first_operand.convert = zero_dpf + first_operand.convert;
+            else second_operand.convert = zero_dpf + second_operand.convert;
         }
-//        str_operand == '/' ?  fin >> division_b : fin >> second.convert;
+//        Operator == '/' ?  fin >> division_b : fin >> second_operand.convert;
 
-        reading_big(first);
-        reading_big(second);
+        reading_big(first_operand);
+        reading_big(second_operand);
         reading_big(answer);
 
-        start_time =  clock();
 
-
-        if (str_operand == '+') {
-            if (first.sign && !second.sign || !first.sign && second.sign){
-                first = differnt_big(first, second);
+        if (Operator == '+') {
+            if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
+                first_operand = differnt_big(first_operand, second_operand);
             }
             else {
-                if (first.sign && second.sign) {
-                    first.sign = true;
+                if (first_operand.sign && second_operand.sign) {
+                    first_operand.sign = true;
                 }
                 else{
-                    first.sign = false;
+                    first_operand.sign = false;
                 }
-                first = addition_big(first, second);
+                first_operand = addition_big(first_operand, second_operand);
             }
-            if (first.numbers.size() == 1 && first.numbers[0] == 0){
-                first.sign = 0;
+            if (first_operand.numbers.size() == 1 && first_operand.numbers[0] == 0){
+                first_operand.sign = 0;
             }
         }
 
-        else if (str_operand == '-') {
-            if (first.sign && !second.sign || !first.sign && second.sign){
-                if (first.sign && !second.sign) {
-                    first.sign = true;
+        else if (Operator == '-') {
+
+            if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
+                if (first_operand.sign && !second_operand.sign) {
+                    first_operand.sign = true;
                 }
                 else{
-                    first.sign = false;
+                    first_operand.sign = false;
                 }
-                first = addition_big(first, second);
+                first_operand = addition_big(first_operand, second_operand);
             }
             else {
-                first = differnt_big(first, second);
+                first_operand = differnt_big(first_operand, second_operand);
             }
-            if (first.numbers.size() == 1 && first.numbers[0] == 0){
-                first.sign = 0;
+            if (first_operand.numbers.size() == 1 && first_operand.numbers[0] == 0){
+                first_operand.sign = 0;
             }
         }
 
-        else if (str_operand == '*') {
-            auto n = max(first.numbers.size(), second.numbers.size());
-            extend_vec(first.numbers, n);
-            extend_vec(second.numbers, n);
+        else if (Operator == '*') {
+            auto n = max(first_operand.numbers.size(), second_operand.numbers.size());
+            extend_vec(first_operand.numbers, n);
+            extend_vec(second_operand.numbers, n);
             if (n < MAX_USE_NAIVE_MUL) {
-                first.numbers = naive_mul(first.numbers, second.numbers);
+                first_operand.numbers = naive_mul(first_operand.numbers, second_operand.numbers);
 
             } else {
-                first = fft_multiply(first, second);
+                first_operand = fft_multiply(first_operand, second_operand);
             }
-            if (first.sign && !second.sign || !first.sign && second.sign){
-                first.sign = true;
+            if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
+                first_operand.sign = true;
             }
         }
 
-        else if (str_operand == '/'){
-//            division_big(first.numbers, division_b);
-//            first = big_division(first, second);
+        else if (Operator == '/'){
+//            division_big(first_operand.numbers, division_b);
+//            first_operand = big_division(first_operand, second_operand);
         }
 
-        remove_leading_zeros(first.numbers);
+        remove_leading_zeros(first_operand.numbers);
 
-        end_time = clock();
-//        cout << end_time - start_time << " " << tests << endl;
-        if (first.numbers != answer.numbers || answer.sign != first.sign || end_time - start_time >= EXECUTION_TIME) {
-            wrong_test.push_back(tests);
-            fout << tests  << ") wrong answer ";
-            if (first.numbers != answer.numbers || answer.sign != first.sign){
-                print_big(first);
+
+        if (first_operand.numbers != answer.numbers || answer.sign != first_operand.sign ) {
+            wrong_test.push_back(i);
+            fout << i << ") wrong answer ";
+            if (first_operand.numbers != answer.numbers || answer.sign != first_operand.sign){
+                print_big(first_operand);
                 fout << ": correct answer ";
                 print_big(answer);
                 fout << endl;
             }
-            else if (end_time - start_time >= EXECUTION_TIME) {
-                fout << end_time - start_time << "(ms)";
-                fout << ": Time Limit" << endl;
-            }
+
         }
         else{
-            fout << tests << ") OK" << endl;
+            fout << i << ") OK" << endl;
         }
 
-        first = {};
-        second = {};
+        first_operand = {};
+        second_operand = {};
         answer = {};
     }
 
-    cout << 1ll;
-
     if (wrong_test.empty()){
-        fout << "OK";
+        fout << "OK" << endl;
     }
     else {
         fout << "wrong test: ";
@@ -506,9 +488,160 @@ int main()
             }
             fout << wrong_test[i];
         }
+        fout << endl;
+    }
+    fout << "the logic test is completed" << endl;
+}
+
+void test_eff(int tests, big_integer &first_operand, big_integer &second_operand, big_integer &answer,char Operator){
+    fout << "The effectiv test has begun" << endl;
+
+    int start_time;
+    int end_time;
+
+
+    for (int i = 1; i <= tests; i++){
+
+        fin_eff >> first_operand.convert >> Operator >> second_operand.convert;
+        fin_eff_answer >> answer.convert;
+
+
+        if (Operator == '*' && max(first_operand.convert.size(), second_operand.convert.size()) > MAX_USE_NAIVE_MUL){
+            if (first_operand.convert.size() >= second_operand.convert.size()) first_operand.convert = zero_dpf + first_operand.convert;
+            else second_operand.convert = zero_dpf + second_operand.convert;
+        }
+//        Operator == '/' ?  fin >> division_b : fin >> second_operand.convert;
+
+        reading_big(first_operand);
+        reading_big(second_operand);
+        reading_big(answer);
+
+        start_time =  clock();
+        if (Operator == '+') {
+            if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
+                first_operand = differnt_big(first_operand, second_operand);
+            }
+            else {
+                if (first_operand.sign && second_operand.sign) {
+                    first_operand.sign = true;
+                }
+                else{
+                    first_operand.sign = false;
+                }
+                first_operand = addition_big(first_operand, second_operand);
+            }
+            if (first_operand.numbers.size() == 1 && first_operand.numbers[0] == 0){
+                first_operand.sign = 0;
+            }
+        }
+
+        else if (Operator == '-') {
+
+            if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
+                if (first_operand.sign && !second_operand.sign) {
+                    first_operand.sign = true;
+                }
+                else{
+                    first_operand.sign = false;
+                }
+                first_operand = addition_big(first_operand, second_operand);
+            }
+            else {
+                first_operand = differnt_big(first_operand, second_operand);
+            }
+            if (first_operand.numbers.size() == 1 && first_operand.numbers[0] == 0){
+                first_operand.sign = 0;
+            }
+        }
+
+        else if (Operator == '*') {
+            auto n = max(first_operand.numbers.size(), second_operand.numbers.size());
+            extend_vec(first_operand.numbers, n);
+            extend_vec(second_operand.numbers, n);
+            if (n < MAX_USE_NAIVE_MUL) {
+                first_operand.numbers = naive_mul(first_operand.numbers, second_operand.numbers);
+
+            } else {
+                first_operand = fft_multiply(first_operand, second_operand);
+            }
+            if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
+                first_operand.sign = true;
+            }
+        }
+
+        else if (Operator == '/'){
+//            division_big(first_operand.numbers, division_b);
+//            first_operand = big_division(first_operand, second_operand);
+        }
+
+        remove_leading_zeros(first_operand.numbers);
+        end_time = clock();
+
+
+        if (first_operand.numbers != answer.numbers || answer.sign != first_operand.sign || end_time - start_time >= EXECUTION_TIME) {
+            wrong_test.push_back(i);
+            fout << i << ") wrong answer ";
+            if (first_operand.numbers != answer.numbers || answer.sign != first_operand.sign){
+                print_big(first_operand);
+                fout << ": correct answer ";
+                print_big(answer);
+                fout << endl;
+            }
+            else if (end_time - start_time >= EXECUTION_TIME) {
+                fout << end_time - start_time << "(ms)";
+                fout << ": Time Limit" << endl;
+            }
+
+        }
+        else{
+            fout << i << ") OK" << endl;
+        }
+
+        first_operand = {};
+        second_operand = {};
+        answer = {};
     }
 
+    if (wrong_test.empty()){
+        fout << "OK" << endl;
+    }
+    else {
+        fout << "wrong test: ";
+        for (int i = 0; i < wrong_test.size(); i++) {
+            if (i >= 1){
+                fout << ", ";
+            }
+            fout << wrong_test[i];
+        }
+        fout << endl;
+    }
+    fout << "the effectiv test is completed" << endl;
+}
 
-    fin.close();
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int main()
+{
+    struct big_integer first_operand;
+    struct big_integer second_operand;
+    struct big_integer answer;
+
+
+    char Operator;
+    int division_b;
+    int tests_logic = 15;
+    int tests_eff = 9;
+
+
+    test_logic(tests_logic,first_operand,second_operand,answer,Operator);
+
+    test_eff(tests_eff,first_operand,second_operand,answer,Operator);
+
+    fin_logic.close();
+    fin_logic_answer.close();
+    fin_eff_answer.close();
+    fin_eff.close();
     fout.close();
 }

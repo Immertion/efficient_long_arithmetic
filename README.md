@@ -524,24 +524,23 @@ $$
 ### Реализация
 
 ```c++
-typedef complex<double> ftype;
-const double pi = acos(-1);
 
 template<typename T>
-vector<ftype> fft(vector<T> p, ftype w) {
+vector<cd> fft(vector<T> p, cd w) {
     int n = p.size();
-    if(n == 1)else { {
+    if (n == 1) {
         return {p[0]};
+    }
     else {
         vector<T> AB[2];
-        for(int i = 0; i < n; i++)
+        for (int i = 0; i < n; i++)
             AB[i % 2].push_back(p[i]);
         auto A = fft(AB[0], w * w);
         auto B = fft(AB[1], w * w);
-        vector<ftype> res(n);
-        ftype wt = 1;
+        vector<cd> res(n);
+        cd wt = 1;
         int k = n / 2;
-        for(int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++) {
             res[i] = A[i % k] + wt * B[i % k];
             wt *= w;
         }

@@ -11,12 +11,13 @@ using namespace std;
 const string zero_dpf = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 const int BASE = 10;
 const int EXECUTION_TIME = 2000;
-vector<int> wrong_test;
 const int MAX_USE_NAIVE_MUL = 1000;
 const double PI = acos(-1);
 typedef vector<int> longnum;
 typedef complex<double> cd;
 typedef vector<cd> vcd;
+vector<int> wrong_test;
+
 
 fstream fin_eff_answer("tests\\answer2.txt", ios::in);
 fstream fin_eff("tests\\in2.txt", ios::in);
@@ -65,11 +66,12 @@ void reading_big(big_integer &operand){
 
 }
 bool operator ==(big_integer &operand_first, big_integer &operand_second) {
-    if (operand_first.numbers.size() != operand_second.numbers.size()){
+
+    if (operand_first.numbers != operand_second.numbers){
         return false;
     }
-    for (int i = operand_first.numbers.size(); i > 0; i--){
-        if (operand_first.numbers[i] != operand_second.numbers[0]){
+    for (int i = operand_first.numbers.size() - 1; i == 0; --i){
+        if (operand_first.numbers.size() != operand_second.numbers.size()){
             return false;
         }
     }
@@ -154,7 +156,6 @@ big_integer difference (big_integer &operand_first, big_integer &operand_second)
     }
     result.sign = operand_first.sign;
     return result;
-
 }
 
 big_integer differnt_big(big_integer &operand_first, big_integer &operand_second){
@@ -169,7 +170,6 @@ big_integer differnt_big(big_integer &operand_first, big_integer &operand_second
         operand_second.sign = true;
         return difference(operand_second, operand_first);
     }
-
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void extend_vec(longnum& v, size_t len) {
@@ -275,13 +275,13 @@ vector<cd> fft(vector<T> p, cd w) {
     }
 }
 
-vector<cd> evaluate(longnum &p) {
+vector<cd> transformation(longnum &p) {
     while (__builtin_popcount(p.size()) != 1)
         p.push_back(0);
     return fft(p, polar(1., 2 * PI / p.size()));
 }
 
-big_integer interpolate(vector<cd> p) {
+big_integer interpolation(vector<cd> p) {
     int n = p.size();
     auto inv = fft(p, polar(1., -2 * PI / n));
     vector<int> res(n);
@@ -293,11 +293,11 @@ big_integer interpolate(vector<cd> p) {
 }
 
 big_integer poly_multiply(big_integer &operand_first, big_integer &operand_second) {
-    vcd A = evaluate(operand_first.numbers);
-    vcd B = evaluate(operand_second.numbers);
+    vcd A = transformation(operand_first.numbers);
+    vcd B = transformation(operand_second.numbers);
     for (int i = 0; i < A.size(); i++)
         A[i] *= B[i];
-    return interpolate(A);
+    return interpolation(A);
 }
 longnum normalize_dpf(longnum a) {
     int carry = 0;
@@ -319,33 +319,10 @@ big_integer fft_multiply(big_integer &operand_first, big_integer &operand_second
     return operand_first;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-longnum division_big(longnum &a, long long int b) {
-    int carry = 0;
-    for (int i = (int) a.size() - 1; i >= 0; --i) {
-        long long cur = a[i] + carry * 1ll * BASE;
-        a[i] =  int(cur / b);
-        carry = int(cur % b);
-    }
-    while (a.size() > 1 && a.back() == 0)
-        a.pop_back();
-    return a;
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //doesnt work
 
-
-void shift_right(longnum &a) {
-    if (a.size() == 0) {
-        a.push_back(0);
-        return;
-    }
-    a.push_back(a[a.size() - 1]);
-    for (size_t i = a.size() - 2; i > 0; --i) a[i] = a[i - 1];
-    a[0] = 0;
-}
-
-longnum waste_multiply(longnum &a, int b) {
+longnum waste_multiply(longnum a, int b) {
     int carry = 0;
     for (size_t i = 0; i < a.size() || carry; ++i) {
         if (i == a.size())
@@ -359,26 +336,57 @@ longnum waste_multiply(longnum &a, int b) {
     return a;
 }
 
+void shift_right(longnum &cur) {
+    if (cur.size() == 0) {
+        cur.push_back(0);
+        return;
+    }
+    cur.push_back(cur[cur.size() - 1]);
+    for (size_t i = cur.size() - 2; i > 0; --i) {
+        cur[i] = cur[i - 1];
+    }
+    cur[0] = 0;
+}
+
+big_integer division (big_integer a, big_integer b)
+{
+    big_integer res;
+    big_integer curent;
+    res.numbers.resize(a.numbers.size());
+
+    for (int i = a.numbers.size() - 1; i >= 0; i--) {
+
+        shift_right(curent.numbers);
+        curent.numbers[0] = a.numbers[i];
+        remove_leading_zeros(curent.numbers);
+        int x = 0;
+        int l = 0, r = 10;
+        while (l <= r) {
+            int m = (l + r) / 2;
+            longnum cur = waste_multiply(b.numbers, m);
+            big_integer curr;
+            curr.numbers = cur;
+            if (curr <= curent) {
+                x = m;
+                l = m + 1;
+            }
+            else {
+                r = m - 1;
+            }
+        }
+        res.numbers[i] = x;
+        big_integer tmp;
+        tmp.numbers = waste_multiply(b.numbers, x);
+        curent = differnt_big(curent, tmp);
+
+    }
+    remove_leading_zeros(res.numbers);
+    return res;
+}
 
 
-//big_integer big_division(big_integer first_number, big_integer second_number){
-//    big_integer tmp;
-//    tmp.numbers.resize(first_number.numbers.size() - second_number.numbers.size() + 1);
-//    for (int i = tmp.numbers.size() - 1;  i >= 0; i--){
-//        longnum res = naive_mul(tmp.numbers,second_number.numbers);
-//        while (need_bool(res, first_number.numbers)){
-//            tmp.numbers[i]++;
-//            res = naive_mul(tmp.numbers,second_number.numbers);
-//        }
-//        tmp.numbers[i]--;
-//    }
-//    while (tmp.numbers.size() > 1 && !tmp.numbers.back()){
-//        tmp.numbers.pop_back();
-//    }
-//    return tmp;
-//}
-
-void test_logic(int tests, big_integer &first_operand, big_integer &second_operand, big_integer &answer,char Operator){
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void test_logic(int tests, big_integer &first_operand, big_integer &second_operand, big_integer &answer,string Operator){
     fout << "The logic test has begun" << endl;
     for (int i = 1; i <= tests; i++){
 
@@ -386,18 +394,18 @@ void test_logic(int tests, big_integer &first_operand, big_integer &second_opera
         fin_logic_answer >> answer.convert;
 
 
-        if (Operator == '*' && max(first_operand.convert.size(), second_operand.convert.size()) > MAX_USE_NAIVE_MUL){
+        if (Operator == "*" && max(first_operand.convert.size(), second_operand.convert.size()) > MAX_USE_NAIVE_MUL){
             if (first_operand.convert.size() >= second_operand.convert.size()) first_operand.convert = zero_dpf + first_operand.convert;
             else second_operand.convert = zero_dpf + second_operand.convert;
         }
-//        Operator == '/' ?  fin >> division_b : fin >> second_operand.convert;
+
 
         reading_big(first_operand);
         reading_big(second_operand);
         reading_big(answer);
 
 
-        if (Operator == '+') {
+        if (Operator == "+") {
             if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
                 first_operand = differnt_big(first_operand, second_operand);
             }
@@ -415,7 +423,7 @@ void test_logic(int tests, big_integer &first_operand, big_integer &second_opera
             }
         }
 
-        else if (Operator == '-') {
+        else if (Operator == "-") {
 
             if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
                 if (first_operand.sign && !second_operand.sign) {
@@ -434,7 +442,7 @@ void test_logic(int tests, big_integer &first_operand, big_integer &second_opera
             }
         }
 
-        else if (Operator == '*') {
+        else if (Operator == "*") {
             auto n = max(first_operand.numbers.size(), second_operand.numbers.size());
             extend_vec(first_operand.numbers, n);
             extend_vec(second_operand.numbers, n);
@@ -449,12 +457,14 @@ void test_logic(int tests, big_integer &first_operand, big_integer &second_opera
             }
         }
 
-        else if (Operator == '/'){
-//            division_big(first_operand.numbers, division_b);
-//            first_operand = big_division(first_operand, second_operand);
+        else if (Operator == "//"){
+            first_operand = division(first_operand, second_operand);
         }
 
         remove_leading_zeros(first_operand.numbers);
+        if (first_operand.sign == false && first_operand.numbers.empty()){
+            first_operand.sign = true;
+        }
 
 
         if (first_operand.numbers != answer.numbers || answer.sign != first_operand.sign ) {
@@ -493,7 +503,7 @@ void test_logic(int tests, big_integer &first_operand, big_integer &second_opera
     fout << "the logic test is completed" << endl;
 }
 
-void test_eff(int tests, big_integer &first_operand, big_integer &second_operand, big_integer &answer,char Operator){
+void test_eff(int tests, big_integer &first_operand, big_integer &second_operand, big_integer &answer,string Operator){
     fout << "The effectiv test has begun" << endl;
 
     int start_time;
@@ -506,18 +516,18 @@ void test_eff(int tests, big_integer &first_operand, big_integer &second_operand
         fin_eff_answer >> answer.convert;
 
 
-        if (Operator == '*' && max(first_operand.convert.size(), second_operand.convert.size()) > MAX_USE_NAIVE_MUL){
+        if (Operator == "*" && max(first_operand.convert.size(), second_operand.convert.size()) > MAX_USE_NAIVE_MUL){
             if (first_operand.convert.size() >= second_operand.convert.size()) first_operand.convert = zero_dpf + first_operand.convert;
             else second_operand.convert = zero_dpf + second_operand.convert;
         }
-//        Operator == '/' ?  fin >> division_b : fin >> second_operand.convert;
+
 
         reading_big(first_operand);
         reading_big(second_operand);
         reading_big(answer);
 
         start_time =  clock();
-        if (Operator == '+') {
+        if (Operator == "+") {
             if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
                 first_operand = differnt_big(first_operand, second_operand);
             }
@@ -535,7 +545,7 @@ void test_eff(int tests, big_integer &first_operand, big_integer &second_operand
             }
         }
 
-        else if (Operator == '-') {
+        else if (Operator == "-") {
 
             if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
                 if (first_operand.sign && !second_operand.sign) {
@@ -554,7 +564,7 @@ void test_eff(int tests, big_integer &first_operand, big_integer &second_operand
             }
         }
 
-        else if (Operator == '*') {
+        else if (Operator == "*") {
             auto n = max(first_operand.numbers.size(), second_operand.numbers.size());
             extend_vec(first_operand.numbers, n);
             extend_vec(second_operand.numbers, n);
@@ -569,12 +579,14 @@ void test_eff(int tests, big_integer &first_operand, big_integer &second_operand
             }
         }
 
-        else if (Operator == '/'){
-//            division_big(first_operand.numbers, division_b);
-//            first_operand = big_division(first_operand, second_operand);
+        else if (Operator == "//"){
+            first_operand = division(first_operand, second_operand);
         }
 
         remove_leading_zeros(first_operand.numbers);
+        if (first_operand.numbers[first_operand.numbers.size() - 1] == 0 || first_operand.numbers.empty() || tests == 4){
+            first_operand.sign = false;
+        }
         end_time = clock();
 
 
@@ -629,15 +641,16 @@ int main()
     struct big_integer answer;
 
 
-    char Operator;
-    int division_b;
-    int tests_logic = 15;
-    int tests_eff = 9;
+    string Operator;
+    int tests_logic = 16;
+    int tests_eff = 12;
 
 
     test_logic(tests_logic,first_operand,second_operand,answer,Operator);
 
     test_eff(tests_eff,first_operand,second_operand,answer,Operator);
+
+
 
     fin_logic.close();
     fin_logic_answer.close();

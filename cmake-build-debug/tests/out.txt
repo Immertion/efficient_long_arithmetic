@@ -14,6 +14,7 @@ The logic test has begun
 13) OK
 14) OK
 15) OK
+16) OK
 OK
 the logic test is completed
 The effectiv test has begun
@@ -26,5 +27,8 @@ The effectiv test has begun
 7) OK
 8) OK
 9) OK
+10) OK
+11) OK
+12) OK
 OK
 the effectiv test is completed

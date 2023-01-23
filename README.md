@@ -206,7 +206,7 @@ big_integer difference (big_integer &operand_first, big_integer &operand_second)
 ---
 Самый простой и не эффективный алгоритм умножения длинных чисел. Асиптотика O($n^2$)
 ``` c++
-void finalize(longnum& res) {
+void conversion_to_the_number_system(longnum& res) {
     for (auto i = 0; i < res.size(); ++i) {
         res[i + 1] += res[i] / BASE;
         res[i] %= BASE;
@@ -222,13 +222,13 @@ vector<int> naive_mul(longnum& number_first, longnum& number_second) {
             res[i + j] += number_first[i] * number_second[j];
         }
     }
-    finalize(res);
+    conversion_to_the_number_system(res);
     return res;
 }
 
 ``` 
 Создаём массив размером 2*len(где len длинна первого числа)
-Функция finalize() переносит цифру если ячейка массива больше нашей базы
+Функция conversion_to_the_number_system() переносит цифру если ячейка массива больше нашей базы
 Первое число последовательно умножается на каждую цифру. Результат умножения на i-тую цифру прибавляется к общему результату со сдвигом на i – 1.
 
 

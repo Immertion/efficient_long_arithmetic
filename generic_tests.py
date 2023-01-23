@@ -5,7 +5,7 @@ sys.set_int_max_str_digits(200000)
 in_txt = open(r'cmake-build-debug\tests\in.txt', 'r')
 ans_txt = open(r'cmake-build-debug\tests\answer.txt', 'w')
 
-tests_logic = 16
+tests_logic = 23
 
 for i in range(tests_logic):
     string = in_txt.readline()
@@ -21,7 +21,7 @@ ans_txt.close()
 
 in_txt = open(r'cmake-build-debug\tests\in2.txt', 'w')
 
-tests_eff = 3
+tests_eff = 5
 
 for i in range (tests_eff):
     random.seed(100 + i)

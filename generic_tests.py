@@ -1,6 +1,6 @@
 import sys
 import random
-sys.set_int_max_str_digits(200000)
+sys.set_int_max_str_digits(600000)
 
 in_txt = open(r'cmake-build-debug\tests\in.txt', 'r')
 ans_txt = open(r'cmake-build-debug\tests\answer.txt', 'w')
@@ -49,7 +49,7 @@ for i in range (tests_eff):
     in_txt.write(str(a))
     in_txt.write(" * ")
     random.seed(1000 + 2*i)
-    a = random.randint(1,10**15000)
+    a = random.randint(1,10**30000)
     in_txt.write(str(a))
     in_txt.write("\n")
 

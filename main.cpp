@@ -1,51 +1,46 @@
 #include "efficient-long-arithmetic.h"
 
 void big_integer::PrintBigNumber(fstream &fout){
-    if (this->sign){
+    if (sign){
         fout << '-';
     }
-    for (int i = this->numbers.size() - 1; i >= 0; i--){
-        fout <<  this->numbers[i];
+    for (int i = numbers.size() - 1; i >= 0; i--){
+        fout <<  numbers[i];
     }
 }
 
 void big_integer::RemoveLeadingZeros(){
-    for (int i = this->numbers.size() - 1; i >= 0; i--){
-        if (this->numbers[i] == 0){
-            this->numbers.pop_back();
+    for (int i = numbers.size() - 1; i >= 0; i--){
+        if (numbers[i] == 0){
+            numbers.pop_back();
         }
         else{
             break;
         }
     }
-    if (this->numbers.empty()){
-        this->numbers.push_back(0);
+    if (numbers.empty()){
+        numbers.push_back(0);
     }
 }
 
-void big_integer::ReadingBigNumber(){
-    if (this->convert[0] == '-'){
-        this->sign = true;
-        this->convert.erase(0,1);
+void big_integer::ReadingBigNumber(string &number){
+    convert = number;
+    if (convert[0] == '-'){
+        sign = true;
+        convert.erase(0,1);
     }
-    for (int i = this->convert.length(); i > 0; i -= 9){
-//        this->numbers.push_back(static_cast<int>(this->convert[i]) - 48);
-        if (i < 9) {
-            this->numbers.push_back(atoi(convert.substr(0, i).c_str()));
-        }
-        else{
-            this->numbers.push_back(atoi(convert.substr(i - 9, i).c_str()));
-        }
+    for (int i = convert.length() - 1; i >= 0; i --){
+        numbers.push_back(static_cast<int>(convert[i]) - 48);
     }
 }
 
 
 bool big_integer::operator ==(big_integer &operand_second){
-    if (this->numbers != operand_second.numbers){
+    if (numbers != operand_second.numbers){
         return false;
     }
-    for (int i = this->numbers.size() - 1; i == 0; --i){
-        if (this->numbers.size() != operand_second.numbers.size()){
+    for (int i = numbers.size() - 1; i == 0; --i){
+        if (numbers.size() != operand_second.numbers.size()){
             return false;
         }
     }
@@ -53,76 +48,77 @@ bool big_integer::operator ==(big_integer &operand_second){
 }
 
 bool big_integer::operator <(big_integer &operand_second){
-    if (this->operator==(operand_second)) return false;
+    if (operator==(operand_second)) return false;
 
-    if (this->numbers.size() != operand_second.numbers.size()) {
-        return this->numbers.size() < operand_second.numbers.size();
+    if (numbers.size() != operand_second.numbers.size()) {
+        return numbers.size() < operand_second.numbers.size();
     }
     else {
-        for (int i = this->numbers.size() - 1; i >= 0; --i) {
-            if (this->numbers[i] != operand_second.numbers[i]) return this->numbers[i] < operand_second.numbers[i];
+        for (int i = numbers.size() - 1; i >= 0; --i) {
+            if (numbers[i] != operand_second.numbers[i]) return numbers[i] < operand_second.numbers[i];
         }
         return false;
     }
 }
 
 bool big_integer::operator <=(big_integer& operand_second){
-    return (this->operator<(operand_second) || operator==(operand_second));
+    return (operator<(operand_second) || operator==(operand_second));
 }
 
 bool big_integer::operator >(big_integer& operand_second){
-    return !(this->operator<=(operand_second));
+    return !(operator<=(operand_second));
 }
 
 bool big_integer::operator>=(big_integer &operand_second) {
-    return !(this->operator<(operand_second));
+    return !(operator<(operand_second));
 }
 
 big_integer big_integer::AdditionBigNumbers(big_integer &operand_second){
     int length;
-    if (this->numbers.size() > operand_second.numbers.size()) {
-        length = this->numbers.size() + 1;
-        while (this->numbers.size() != operand_second.numbers.size()){
+    if (numbers.size() > operand_second.numbers.size()) {
+        length = numbers.size() + 1;
+        while (numbers.size() != operand_second.numbers.size()){
             operand_second.numbers.push_back(0);
         }
     }
     else {
         length = operand_second.numbers.size() + 1;
-        while (this->numbers.size() != operand_second.numbers.size()){
-            this->numbers.push_back(0);
+        while (numbers.size() != operand_second.numbers.size()){
+            numbers.push_back(0);
         }
     }
     operand_second.numbers.push_back(0);
-    this->numbers.push_back(0);
+    numbers.push_back(0);
     for (int i = 0; i < length; i++)
     {
-        operand_second.numbers[i] += this->numbers[i];
+        operand_second.numbers[i] += numbers[i];
         operand_second.numbers[i + 1] += (operand_second.numbers[i] / BASE);
         operand_second.numbers[i] %= BASE;
     }
 
-    operand_second.sign = this->sign;
+    operand_second.sign = sign;
+    operand_second.RemoveLeadingZeros();
     return operand_second;
 }
 
 big_integer big_integer::DifferenceBigNumbers (big_integer &operand_second){
     big_integer result;
 
-    result.numbers.resize(this->numbers.size());
-    while (this->numbers.size() != operand_second.numbers.size()){
+    result.numbers.resize(numbers.size());
+    while (numbers.size() != operand_second.numbers.size()){
         operand_second.numbers.push_back(0);
     }
-    for (int i = 0; i < this->numbers.size(); i++)
+    for (int i = 0; i < numbers.size(); i++)
     {
-        if (this->numbers[i] >= operand_second.numbers[i]){
-            result.numbers[i] = this->numbers[i] - operand_second.numbers[i];
+        if (numbers[i] >= operand_second.numbers[i]){
+            result.numbers[i] = numbers[i] - operand_second.numbers[i];
         }
         else{
-            this->numbers[i + 1] -= 1;
-            result.numbers[i] = this->numbers[i] + 10 - operand_second.numbers[i];
+            numbers[i + 1] -= 1;
+            result.numbers[i] = numbers[i] + BASE - operand_second.numbers[i];
         }
     }
-    result.sign = this->sign;
+    result.sign = sign;
     result.RemoveLeadingZeros();
     return result;
 }
@@ -131,9 +127,9 @@ big_integer big_integer::SubtractionBigNumbers(big_integer &operand_second){
     RemoveLeadingZeros();
     operand_second.RemoveLeadingZeros();
 
-    if (this->operator>(operand_second)) {
-        this->sign = false;
-        return this->DifferenceBigNumbers(operand_second);
+    if (operator>(operand_second)) {
+        sign = false;
+        return DifferenceBigNumbers(operand_second);
     }
     else{
         operand_second.sign = true;
@@ -143,45 +139,56 @@ big_integer big_integer::SubtractionBigNumbers(big_integer &operand_second){
 
 void big_integer::NumberExpansion(int length){
     while (length & (length - 1)) ++length;
-    this->numbers.resize(length);
+    numbers.resize(length);
 }
 
-void big_integer::_ConversionNumberSystem(){
-    for (auto i = 0; i < this->numbers.size(); ++i) {
-        this->numbers[i + 1] += this->numbers[i] / BASE;
-        this->numbers[i] %= BASE;
+void big_integer::_ConversionNumberBase(){
+    for (auto i = 0; i < numbers.size(); ++i) {
+        numbers[i + 1] += numbers[i] / BASE;
+        numbers[i] %= BASE;
     }
 }
 
 big_integer big_integer::BasicMultiplicationBigNumbers (big_integer &operand_second){
     big_integer result;
-    result.numbers.resize(2 * this->numbers.size());
-    for (auto i = 0; i < this->numbers.size(); ++i) {
-        for (auto j = 0; j < this->numbers.size(); ++j) {
-            result.numbers[i + j] += this->numbers[i] * operand_second.numbers[j];
+    result.numbers.resize(2 * numbers.size());
+    for (auto i = 0; i < numbers.size(); ++i) {
+        for (auto j = 0; j < numbers.size(); ++j) {
+            result.numbers[i + j] += numbers[i] * operand_second.numbers[j];
         }
     }
-    result._ConversionNumberSystem();
+    result._ConversionNumberBase();
     return result;
 }
 
 template<typename T>
 vector<cd> big_integer::_FastFourierTransform(vector<T> p, cd w){
     int n = p.size();
+    if (n == 0) return {};
+
+    if ((n & (n - 1)) != 0) {
+        int size = 1;
+        while (size < n)
+            size *= 2;
+        p.resize(size);
+    }
+
     if (n == 1) {
         return {p[0]};
     }
     else {
-        vector<T> AB[2];
-        for (int i = 0; i < n; i++)
-            AB[i % 2].push_back(p[i]);
-        auto A = this->_FastFourierTransform(AB[0], w * w);
-        auto B = this->_FastFourierTransform(AB[1], w * w);
+        vector<T> A, B;
+        for (int i = 0; i < n; i++) {
+            if (i % 2 == 0) A.push_back(p[i]);
+            else B.push_back(p[i]);
+        }
+        auto Af = big_integer::_FastFourierTransform(A, w * w);
+        auto Bf = big_integer::_FastFourierTransform(B, w * w);
         vcd result(n);
         cd wt = 1;
         int k = n / 2;
         for (int i = 0; i < n; i++) {
-            result[i] = A[i % k] + wt * B[i % k];
+            result[i] = Af[i % k] + wt * Bf[i % k];
             wt *= w;
         }
         return result;
@@ -189,47 +196,64 @@ vector<cd> big_integer::_FastFourierTransform(vector<T> p, cd w){
 }
 
 vcd big_integer::_Transformation(){
-    while (__builtin_popcount(this->numbers.size()) != 1)
-        this->numbers.push_back(0);
-    return this->_FastFourierTransform(this->numbers, polar(1., 2 * PI / this->numbers.size()));
+    while (__builtin_popcount(numbers.size()) != 1)
+        numbers.push_back(0);
+    return _FastFourierTransform(numbers, polar(1., 2 * PI / numbers.size()));
 }
 
 big_integer big_integer::_Interpolation(vector<cd> p){
     int n = p.size();
-    auto inv = this->_FastFourierTransform(p, polar(1., -2 * PI / n));
+    auto inv = _FastFourierTransform(p, polar(1., -2 * PI / n));
     vector<int> res(n);
     big_integer result;
     for(int i = 0; i < n; i++)
-        res[i] = round(real(inv[i]) / n);
+        res[i] = floor(real(inv[i]) / n + 0.5);
     result.numbers = res;
     return result;
 }
 
 big_integer big_integer::_PolyMultiplication(big_integer &operand_second){
-    vcd A = this->_Transformation();
+    vcd A = _Transformation();
     vcd B = operand_second._Transformation();
-    for (int i = 0; i < A.size(); i++)
+
+    // handle size mismatch
+    int size = max(A.size(), B.size());
+    if (A.size() < size) A.resize(size);
+    if (B.size() < size) B.resize(size);
+
+    for (int i = 0; i < size; i++)
         A[i] *= B[i];
-    return this->_Interpolation(A);
+
+    big_integer result = _Interpolation(A);
+    return result;
 }
 
 vector<int> big_integer::_NormalizeFastFourierTransform(){
     int carry = 0;
-    for (int &x : this->numbers) {
-        x += carry;
+    for (int i = 0; i < numbers.size(); i++) {
+        int x = numbers[i] + carry;
         carry = x / BASE;
-        x %= BASE;
+        numbers[i] = x % BASE;
     }
     while (carry > 0) {
-        this->numbers.push_back(carry % BASE);
+        numbers.push_back(carry % BASE);
         carry /= BASE;
     }
-    return this->numbers;
+    int i = numbers.size() - 1;
+    while (i > 0 && numbers[i] == 0) {
+        numbers.pop_back();
+        i--;
+    }
+    return numbers;
 }
 
+
 big_integer big_integer::FastFourierTransformMultiplicationBigNumbers(big_integer &operand_second){
-    big_integer result = this->_PolyMultiplication(operand_second);
+    numbers.resize(pow(2,ceil(log2(numbers.size()))) + 1);
+//    operand_second.numbers.resize(pow(2,ceil(log2(operand_second.numbers.size()))) + 1);
+    big_integer result = _PolyMultiplication(operand_second);
     result.numbers = result._NormalizeFastFourierTransform();
+//    RemoveLeadingZeros();
     return result;
 }
 
@@ -248,33 +272,32 @@ big_integer big_integer::_LongOnShortMultiplication(big_integer operand_second, 
 }
 
 void big_integer::_ShiftRight(){
-    if (this->numbers.size() == 0) {
-        this->numbers.push_back(0);
+    if (numbers.size() == 0) {
+        numbers.push_back(0);
         return;
     }
-    this->numbers.push_back(this->numbers[this->numbers.size() - 1]);
-    for (size_t i = this->numbers.size() - 2; i > 0; --i) {
-        this->numbers[i] = this->numbers[i - 1];
+    numbers.push_back(numbers[numbers.size() - 1]);
+    for (size_t i = numbers.size() - 2; i > 0; --i) {
+        numbers[i] = numbers[i - 1];
     }
-    this->numbers[0] = 0;
+    numbers[0] = 0;
 }
 
 big_integer big_integer::DivisionBigNumbers(big_integer &operand_second){
     big_integer result;
     big_integer curent;
-    result.numbers.resize(this->numbers.size());
+    result.numbers.resize(numbers.size());
 
-    for (int i = this->numbers.size() - 1; i >= 0; i--) {
-
+    for (int i = numbers.size() - 1; i >= 0; i--) {
         curent._ShiftRight();
-        curent.numbers[0] = this->numbers[i];
+        curent.numbers[0] = numbers[i];
         curent.RemoveLeadingZeros();
         int x = 0;
         int l = 0, r = BASE;
         while (l <= r) {
             int m = (l + r) / 2;
             big_integer cur;
-            cur = this->_LongOnShortMultiplication(operand_second, m);
+            cur = _LongOnShortMultiplication(operand_second, m);
             if (cur <= curent) {
                 x = m;
                 l = m + 1;
@@ -285,12 +308,13 @@ big_integer big_integer::DivisionBigNumbers(big_integer &operand_second){
         }
         result.numbers[i] = x;
         big_integer tmp;
-        tmp = this->_LongOnShortMultiplication(operand_second, x);
+        tmp = _LongOnShortMultiplication(operand_second, x);
         curent = curent.SubtractionBigNumbers(tmp);
     }
     result.RemoveLeadingZeros();
     return result;
 }
+
 void test_logic(){
     int tests = 24;
     vector<int> wrong_test;
@@ -298,6 +322,9 @@ void test_logic(){
     struct big_integer second_operand;
     struct big_integer answer;
     string Operator;
+    string first_number;
+    string second_number;
+    string answer_number;
 
     fstream fout("tests\\out.txt", ios::out);
     fstream fin_logic_answer("tests\\answer.txt", ios::in);
@@ -307,18 +334,19 @@ void test_logic(){
     fout << "The logic test has begun" << endl;
     for (int i = 1; i <= tests; i++){
 
-        fin_logic >> first_operand.convert >> Operator >> second_operand.convert;
-        fin_logic_answer >> answer.convert;
+        fin_logic >> first_number >> Operator >> second_number;
+        fin_logic_answer >> answer_number;
+
 
 
         if (Operator == "*" && max(first_operand.convert.size(), second_operand.convert.size()) > MAX_USE_NAIVE_MUL){
-            if (first_operand.convert.size() >= second_operand.convert.size()) first_operand.convert = zero_for_dpf + first_operand.convert;
-            else second_operand.convert = zero_for_dpf + second_operand.convert;
+            if (first_operand.convert.size() >= second_operand.convert.size()) first_operand.convert = ZERO_FOR_FFT + first_operand.convert;
+            else second_operand.convert = ZERO_FOR_FFT + second_operand.convert;
         }
 
-        first_operand.ReadingBigNumber();
-        second_operand.ReadingBigNumber();
-        answer.ReadingBigNumber();
+        first_operand.ReadingBigNumber(first_number);
+        second_operand.ReadingBigNumber(second_number);
+        answer.ReadingBigNumber(answer_number);
 
         if (Operator == "+") {
             if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
@@ -334,7 +362,7 @@ void test_logic(){
                 first_operand = first_operand.AdditionBigNumbers(second_operand);
             }
             if (first_operand.numbers.size() == 1 && first_operand.numbers[0] == 0){
-                first_operand.sign = 0;
+                first_operand.sign = false;
             }
         }
 
@@ -354,7 +382,7 @@ void test_logic(){
                 first_operand = first_operand.SubtractionBigNumbers(second_operand);
             }
             if (first_operand.numbers.size() == 1 && first_operand.numbers[0] == 0){
-                first_operand.sign = 0;
+                first_operand.sign = false;
             }
         }
 
@@ -364,8 +392,8 @@ void test_logic(){
             second_operand.NumberExpansion(n);
             if (n < MAX_USE_NAIVE_MUL) {
                 first_operand = first_operand.BasicMultiplicationBigNumbers(second_operand);
-
-            } else {
+            }
+            else {
                 first_operand = first_operand.FastFourierTransformMultiplicationBigNumbers(second_operand);
             }
             if (first_operand.sign && !second_operand.sign || !first_operand.sign && second_operand.sign){
@@ -429,6 +457,10 @@ void time_test(){
     struct big_integer second_operand;
     struct big_integer answer;
     string Operator;
+    string first_number;
+    string second_number;
+    string answer_number;
+
 
     fstream fout("tests\\out.txt", ios::out);
     fstream fin_eff_answer("tests\\answer2.txt", ios::in);
@@ -443,18 +475,17 @@ void time_test(){
 
     for (int i = 1; i <= tests; i++){
 
-        fin_eff >> first_operand.convert >> Operator >> second_operand.convert;
-        fin_eff_answer >> answer.convert;
+        fin_eff >> first_number >> Operator >> second_number;
+        fin_eff_answer >> answer_number;
 
-
-        if (Operator == "*" && max(first_operand.convert.size(), second_operand.convert.size()) > MAX_USE_NAIVE_MUL){
-            if (first_operand.convert.size() >= second_operand.convert.size()) first_operand.convert = zero_for_dpf + first_operand.convert;
-            else second_operand.convert = zero_for_dpf + second_operand.convert;
+        if (Operator == "*" && max(first_number.size(), second_number.size()) > MAX_USE_NAIVE_MUL){
+            if (first_number.size() >= second_number.size()) first_number = ZERO_FOR_FFT + first_number;
+            else second_number = ZERO_FOR_FFT + second_number;
         }
 
-        first_operand.ReadingBigNumber();
-        second_operand.ReadingBigNumber();
-        answer.ReadingBigNumber();
+        first_operand.ReadingBigNumber(first_number);
+        second_operand.ReadingBigNumber(second_number);
+        answer.ReadingBigNumber(answer_number);
 
         start_time =  clock();
         if (Operator == "+") {
@@ -513,7 +544,7 @@ void time_test(){
         }
 
         first_operand.RemoveLeadingZeros();
-        if (first_operand.numbers[first_operand.numbers.size() - 1] == 0 || first_operand.numbers.empty() || tests == 4){
+        if (first_operand.numbers[first_operand.numbers.size() - 1] == 0 || first_operand.numbers.empty()){
             first_operand.sign = false;
         }
         end_time = clock();
@@ -566,13 +597,32 @@ void time_test(){
 int main()
 {
     fstream fout("tests\\out.txt", ios::out);
-
+    fstream tout("tests\\tout1.txt",ios::out);
 //    test_logic();
 //    time_test();
+    tout << "digit time" << endl;
 
-    big_integer a, b;
-    a.convert = "12345678912345678";
-    a.ReadingBigNumber();
-    a.PrintBigNumber(fout);
+    string aa = "1";
+    srand(time(0));
+    for (int i = 1; i < 10000; i+= 100){
+        big_integer a, b;
+        a.ReadingBigNumber(aa);
+        b = a;
+        for (int j = 0; j < 100; j++) {
+            int digit = 1 + rand() % 8;
+            aa += to_string(digit);
+        }
+        auto start = chrono::steady_clock::now();
+        for(int l = 0; l < 5; l++){
+        a.DivisionBigNumbers(b);
+        }
+        auto end = chrono::steady_clock::now();
+        auto time = chrono::duration_cast<chrono::microseconds>(end - start);
+        tout << i << " " << (time.count() / 5) << endl;
+//        a.PrintBigNumber(fout);
+        fout << endl;
+    }
+
+
 
 }
